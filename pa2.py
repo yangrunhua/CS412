@@ -129,7 +129,7 @@ while len(fs[k]) != 0:
             checked, index = check_exists(tdb_new[x], cand, start_pos=x[1])
             if checked:
                 count += 1
-                review_to_projectdb[hashable_str] += [(x[0], index)]
+                review_to_projectdb[hashable_str] += (x[0], index)
         if count >= record_no * min_support:
             fs[k + 1].append(cand)
             ct[k + 1].append(count)
