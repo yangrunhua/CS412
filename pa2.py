@@ -40,7 +40,7 @@ idx = 0
 for i in review_to_support.keys():
     if review_to_support[i] >= record_no * min_support:
         fs[1].append([idx])
-        review_to_projectdb[str(idx)] = review_term_to_projectdb[i]
+        review_to_projectdb[str(idx)] = [(review_term_to_projectdb[i][0], 0)]
         ct[1].append(review_to_support[i])
         f_part3.write('{}:{}\n'.format(review_to_support[i], i))
     idx += 1
@@ -54,11 +54,11 @@ for i in tdb:
         tdb_new[-1].append(fs1_list.index(j))
 
 
-def check_exists(l, lookup_list):
-    for idx in range(len(l) - len(lookup_list) + 1):
+def check_exists(l, lookup_list, start_pos = 0):
+    for idx in range(start_pos, len(l) - len(lookup_list) + 1):
         if l[idx:idx + len(lookup_list)] == lookup_list:
-            return True
-    return False
+            return True, idx
+    return False, 0
 
 
 cs_last_set = {str(i[0]) for i in fs[1]}
@@ -124,11 +124,12 @@ while len(fs[k]) != 0:
         hashable_str_last = ' '.join(str(e) for e in cand[:-1])
         hashable_str = hashable_str_last + ' ' + str(cand[-1])
         review_to_projectdb[hashable_str] = []
-        projected_db = [i for i in review_to_projectdb[hashable_str_last]]
+        projected_db = [i[0] for i in review_to_projectdb[hashable_str_last]]
         for x in projected_db:
-            if check_exists(tdb_new[x], cand):
+            checked, index = check_exists(tdb_new[x], cand, start_pos=x[1])
+            if checked:
                 count += 1
-                review_to_projectdb[hashable_str] += [x]
+                review_to_projectdb[hashable_str] += [(x[0], index)]
         if count >= record_no * min_support:
             fs[k + 1].append(cand)
             ct[k + 1].append(count)
