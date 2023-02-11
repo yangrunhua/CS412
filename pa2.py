@@ -24,10 +24,10 @@ while line := f.readline().strip().split(' '):
         for review_term in dict.fromkeys(line):
             if review_term in review_to_support:
                 review_to_support[review_term] += 1
-                review_term_to_projectdb[review_term].append(record_no-1)
+                review_term_to_projectdb[review_term].append((record_no - 1, tdb[-1].index(review_term)))
             else:
                 review_to_support[review_term] = 1
-                review_term_to_projectdb[review_term] = [record_no-1]
+                review_term_to_projectdb[review_term] = [(record_no - 1, tdb[-1].index(review_term))]
 f.close()
 
 f_part3 = open('patterns_3.txt', 'w')
@@ -40,7 +40,7 @@ idx = 0
 for i in review_to_support.keys():
     if review_to_support[i] >= record_no * min_support:
         fs[1].append([idx])
-        review_to_projectdb[str(idx)] = [(review_term_to_projectdb[i][0], 0)]
+        review_to_projectdb[str(idx)] = review_term_to_projectdb[i]
         ct[1].append(review_to_support[i])
         f_part3.write('{}:{}\n'.format(review_to_support[i], i))
     idx += 1
@@ -54,7 +54,7 @@ for i in tdb:
         tdb_new[-1].append(fs1_list.index(j))
 
 
-def check_exists(l, lookup_list, start_pos = 0):
+def check_exists(l, lookup_list, start_pos=0):
     for idx in range(start_pos, len(l) - len(lookup_list) + 1):
         if l[idx:idx + len(lookup_list)] == lookup_list:
             return True, idx
@@ -80,11 +80,11 @@ while len(fs[k]) != 0:
     if k == 1:
         for row in tdb_new:
             for col in range(0, len(row) - 1):
-                candidate = [row[col], row[col+1]]
-                hashable_str = ' '.join(str(e) for e in [row[col], row[col+1]])
+                candidate = [row[col], row[col + 1]]
+                hashable_str = ' '.join(str(e) for e in [row[col], row[col + 1]])
                 if str(row[col]) in cs_last_set and \
-                   str(row[col+1]) in cs_last_set and \
-                   hashable_str not in cs_current_set:
+                        str(row[col + 1]) in cs_last_set and \
+                        hashable_str not in cs_current_set:
                     cs[k + 1].append(candidate)
                     cs_current_set.add(hashable_str)
     else:
@@ -110,6 +110,8 @@ while len(fs[k]) != 0:
                             c += 1
                             if c % 10000 == 0:
                                 print('Generating {}th candidate for len={}'.format(c, k + 1))
+
+
                     if s[0:z] + s[z + 1:] == t[0:-1]:
                         candidate = s[0:] + [t[-1]]
                         test_and_add(candidate)
@@ -124,12 +126,12 @@ while len(fs[k]) != 0:
         hashable_str_last = ' '.join(str(e) for e in cand[:-1])
         hashable_str = hashable_str_last + ' ' + str(cand[-1])
         review_to_projectdb[hashable_str] = []
-        projected_db = [i[0] for i in review_to_projectdb[hashable_str_last]]
+        projected_db = [i for i in review_to_projectdb[hashable_str_last]]
         for x in projected_db:
-            checked, index = check_exists(tdb_new[x], cand, start_pos=x[1])
+            checked, index = check_exists(tdb_new[x[0]], cand, start_pos=x[1])
             if checked:
                 count += 1
-                review_to_projectdb[hashable_str] += (x[0], index)
+                review_to_projectdb[hashable_str] += [(x[0], index)]
         if count >= record_no * min_support:
             fs[k + 1].append(cand)
             ct[k + 1].append(count)
